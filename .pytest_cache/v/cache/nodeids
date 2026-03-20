@@ -1,0 +1,18 @@
+[
+  "tests/test_api.py::test_create_request_requires_admin_key",
+  "tests/test_api.py::test_create_request_with_admin_key",
+  "tests/test_api.py::test_health",
+  "tests/test_api.py::test_request_lookup_by_id",
+  "tests/test_api.py::test_requests_endpoint_is_paginated",
+  "tests/test_api.py::test_requests_endpoint_requires_admin_key",
+  "tests/test_policy.py::test_ambiguous_prompt_requests_clarification",
+  "tests/test_policy.py::test_destructive_prompt_is_refused",
+  "tests/test_policy.py::test_negated_destructive_phrase_is_not_refused",
+  "tests/test_policy.py::test_weak_evidence_falls_back",
+  "tests/test_ui.py::test_admin_dashboard_requires_session",
+  "tests/test_ui.py::test_admin_login_and_dashboard",
+  "tests/test_ui.py::test_public_page_does_not_expose_admin_key",
+  "tests/test_ui.py::test_submit_validation_returns_html",
+  "tests/test_workflow.py::test_review_required_and_resolved",
+  "tests/test_workflow.py::test_review_resolution_is_idempotent"
+]
