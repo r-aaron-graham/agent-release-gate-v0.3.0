@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-release-gate"
+version = "0.3.0"
+description = "Production-aware release gate for AI agent refusals, fallbacks, clarifications, and human review"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{name = "R. Aaron Graham"}]
+dependencies = [
+  "fastapi==0.115.2",
+  "uvicorn[standard]==0.30.6",
+  "sqlalchemy==2.0.36",
+  "pydantic==2.9.2",
+  "pydantic-settings==2.5.2",
+  "jinja2==3.1.4",
+  "python-multipart==0.0.18",
+  "httpx==0.27.2",
+  "alembic==1.13.3",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: sqlite:////app/data/agent_release_gate.db
+      ADMIN_API_KEY: change-me
+      SESSION_SECRET_KEY: change-me-session-secret
+    volumes:
+      - ./data:/app/data
