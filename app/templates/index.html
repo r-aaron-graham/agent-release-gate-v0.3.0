@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Release Gate</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <h1>Agent Release Gate</h1>
+      <p>Production-style control service for refusals, fallbacks, clarifications, and human review.</p>
+    </div>
+    <div class="hero-actions">
+      <a class="docs-link" href="/docs">API Docs</a>
+      {% if admin_mode %}
+      <form method="post" action="/admin/logout" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="docs-link ghost button-link" type="submit">Admin Logout</button>
+      </form>
+      {% else %}
+      <a class="docs-link ghost" href="/admin/login">Admin Login</a>
+      {% endif %}
+    </div>
+  </header>
+
+  {% if latest_decision %}
+  <section class="panel spotlight {{ latest_decision.outcome }}">
+    <h2>Latest Decision</h2>
+    <p><strong>Outcome:</strong> {{ latest_decision.outcome }}</p>
+    <p><strong>Prompt:</strong> {{ latest_decision.prompt }}</p>
+    <p><strong>Reason:</strong> {{ latest_decision.reason_summary }}</p>
+    <p><strong>Suggested Response:</strong> {{ latest_decision.suggested_response }}</p>
+  </section>
+  {% endif %}
+
+  <main class="layout {% if admin_mode %}admin-layout{% endif %}">
+    <section class="panel">
+      <h2>Submit Request</h2>
+      <form method="post" action="/submit" class="form-grid">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label>User Name<input name="user_name" value="Aaron" required maxlength="100"></label>
+        <label>Role
+          <select name="role">
+            <option>viewer</option>
+            <option selected>analyst</option>
+            <option>architect</option>
+            <option>admin</option>
+          </select>
+        </label>
+        <label>Sensitivity
+          <select name="sensitivity">
+            <option selected>low</option>
+            <option>medium</option>
+            <option>high</option>
+          </select>
+        </label>
+        <label>Evidence Strength<input type="number" step="0.01" min="0" max="1" name="evidence_strength" value="0.90" required></label>
+        <label class="full">Requested Action<input name="requested_action" placeholder="optional" maxlength="100"></label>
+        <label class="full">Prompt<textarea name="prompt" rows="5" required maxlength="{{ settings.max_prompt_length }}">Summarize the onboarding checklist for new team members</textarea></label>
+        <button type="submit">Evaluate Request</button>
+      </form>
+    </section>
+
+    {% if admin_mode %}
+    <section class="panel">
+      <h2>Admin Metrics</h2>
+      <section class="grid metrics compact">
+        <div class="card"><h3>Total</h3><p>{{ metrics.total_requests }}</p></div>
+        <div class="card"><h3>Approved</h3><p>{{ metrics.approved }}</p></div>
+        <div class="card"><h3>Clarify</h3><p>{{ metrics.clarify }}</p></div>
+        <div class="card"><h3>Fallback</h3><p>{{ metrics.fallback }}</p></div>
+        <div class="card"><h3>Review</h3><p>{{ metrics.review_required }}</p></div>
+        <div class="card"><h3>Refused</h3><p>{{ metrics.refused }}</p></div>
+        <div class="card"><h3>Open Reviews</h3><p>{{ metrics.open_reviews }}</p></div>
+      </section>
+
+      <h2>Requests</h2>
+      {% for item in requests_page["items"] %}
+      <article class="request-card {{ item.outcome }}">
+        <div class="request-head">
+          <strong>#{{ item.id }} · {{ item.outcome }}</strong>
+          <span>{{ item.role }} · risk {{ item.risk_score }}</span>
+        </div>
+        <p><strong>User:</strong> {{ item.user_name }}</p>
+        <p><strong>Prompt:</strong> {{ item.prompt_preview }}</p>
+        <p><strong>Reason:</strong> {{ item.reason_summary }}</p>
+        <p><strong>Suggested Response:</strong> {{ item.suggested_response }}</p>
+
+        {% if item.review_id and item.review_status == 'open' %}
+        <details>
+          <summary>Resolve Review #{{ item.review_id }}</summary>
+          <form method="post" action="/admin/reviews/{{ item.review_id }}/resolve" class="review-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <label>Reviewer<input name="reviewer" required maxlength="100"></label>
+            <label>Decision
+              <select name="decision">
+                <option value="approved">approved</option>
+                <option value="rejected">rejected</option>
+              </select>
+            </label>
+            <label>Resolution Note<textarea name="resolution_note" rows="3" required maxlength="1000"></textarea></label>
+            <button type="submit">Resolve</button>
+          </form>
+        </details>
+        {% elif item.review_id %}
+        <p><strong>Review:</strong> {{ item.review_status }}{% if item.review_reviewer %} by {{ item.review_reviewer }}{% endif %}</p>
+        {% endif %}
+      </article>
+      {% else %}
+      <p>No requests yet. Submit the form above.</p>
+      {% endfor %}
+
+      <div class="pagination">
+        {% set prev_offset = requests_page["pagination"]["offset"] - requests_page["pagination"]["limit"] %}
+        {% set next_offset = requests_page["pagination"]["offset"] + requests_page["pagination"]["limit"] %}
+        {% if requests_page["pagination"]["offset"] > 0 %}
+          <a class="docs-link small" href="/admin?limit={{ requests_page["pagination"]["limit"] }}&offset={{ prev_offset }}">Previous</a>
+        {% endif %}
+        {% if requests_page["pagination"]["has_more"] %}
+          <a class="docs-link small" href="/admin?limit={{ requests_page["pagination"]["limit"] }}&offset={{ next_offset }}">Next</a>
+        {% endif %}
+      </div>
+    </section>
+    {% endif %}
+  </main>
+</body>
+</html>

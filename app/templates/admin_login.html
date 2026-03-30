@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login · Agent Release Gate</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <h1>Admin Login</h1>
+      <p>Use the admin API key to access the protected review dashboard.</p>
+    </div>
+    <div class="hero-actions">
+      <a class="docs-link" href="/">Back to Home</a>
+    </div>
+  </header>
+  <main class="layout">
+    <section class="panel narrow">
+      <form method="post" action="/admin/login" class="review-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label>Admin API Key<input type="password" name="api_key" required></label>
+        <button type="submit">Sign In</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

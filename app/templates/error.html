@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Error · Agent Release Gate</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <h1>Form Error</h1>
+      <p>{{ message }}</p>
+    </div>
+    <div class="hero-actions">
+      <a class="docs-link" href="{{ back_url }}">Go Back</a>
+    </div>
+  </header>
+  <main class="layout">
+    <section class="panel">
+      <h2>Validation Details</h2>
+      <ul>
+        {% for err in errors %}
+        <li><strong>{{ err.loc | join(' → ') }}</strong>: {{ err.msg }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
