@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -13,6 +13,7 @@ from app.api.routes import api_router, ui_router
 from app.core.config import settings
 from app.db.session import create_schema_for_local_dev, tables_exist
 from app.services.utils import new_csrf_token
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -26,7 +27,7 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=settings.session_secret_key,
     same_site="lax",
-    https_only=False,
+    https_only=settings.session_https_only,
 )
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.state.templates = Jinja2Templates(directory="app/templates")

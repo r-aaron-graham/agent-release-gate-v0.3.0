@@ -7,7 +7,6 @@ from app.db.session import SessionLocal, create_schema_for_local_dev
 from app.services.schemas import DecisionInput
 from app.services.workflow import decide_request
 
-
 SAMPLES = [
     DecisionInput(user_name="Aaron", role="analyst", prompt="Summarize the onboarding checklist for new team members", evidence_strength=0.9, sensitivity="low"),
     DecisionInput(user_name="Aaron", role="analyst", prompt="Can you handle this for me?", evidence_strength=0.8, sensitivity="low"),

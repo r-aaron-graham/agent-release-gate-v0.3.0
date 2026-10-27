@@ -1,5 +1,10 @@
 # Agent Release Gate
 
+[![CI](https://github.com/r-aaron-graham/agent-release-gate-v0.3.0/actions/workflows/ci.yml/badge.svg)](https://github.com/r-aaron-graham/agent-release-gate-v0.3.0/actions/workflows/ci.yml)
+![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)
+![Docker](https://img.shields.io/badge/docker-ready-2496ED.svg?logo=docker&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 A polished, production-aware release gate for AI systems that need to **refuse**, **fallback**, **ask clarifying questions**, or **route requests to human review** before release.
 
 This repository is the implementation companion to the article idea:
@@ -148,7 +153,24 @@ Then open:
 - Admin Login: http://127.0.0.1:8000/admin/login
 - API docs: http://127.0.0.1:8000/docs
 
-Docker stores SQLite data under `./data` on the host so records persist across container restarts.
+Docker keeps the SQLite database in a named volume (`release-gate-data`), so records persist across container restarts. The container runs as a non-root user, applies migrations on start, and has a healthcheck on `/api/v1/health`.
+
+### Configuration
+
+All settings are environment variables (see `.env.example`).
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `DATABASE_URL` | `sqlite:///./agent_release_gate.db` | SQLAlchemy URL |
+| `ADMIN_API_KEY` | `change-me` | Key for the JSON API and the admin UI. **Change it.** |
+| `SESSION_SECRET_KEY` | `change-me-session-secret` | Signs the browser session cookie. **Change it.** |
+| `PUBLIC_FORM_ENABLED` | `true` | Show the public submission form |
+| `REQUEST_RATE_LIMIT_PER_MINUTE` | `30` | Per-client limit for submissions and API writes |
+| `MAX_PROMPT_LENGTH` | `10000` | Reject longer prompts |
+| `DEFAULT_PAGE_SIZE` / `MAX_PAGE_SIZE` | `20` / `100` | Pagination limits |
+| `AUTO_CREATE_SQLITE_SCHEMA` | `true` | Create tables on startup for local SQLite |
+| `TRUST_PROXY_HEADERS` | `false` | Use `X-Forwarded-For` for rate limiting. Only enable behind a reverse proxy you control. |
+| `SESSION_HTTPS_ONLY` | `false` | Send the session cookie over HTTPS only. Enable when deployed. |
 
 ## Admin authentication
 
@@ -272,8 +294,12 @@ It gives you concrete artifacts to point to in the article:
 ## Running tests
 
 ```bash
-pytest -q
+pip install -r requirements-dev.txt
+make lint   # ruff
+make test   # pytest with coverage
 ```
+
+Beyond the policy, workflow, API and UI tests, the suite includes security regressions (the admin key never appears in the session cookie, spoofed `X-Forwarded-For` cannot bypass the login rate limit, CSRF is enforced, key rotation invalidates sessions) and a migration test that runs the real `alembic upgrade head` the container uses. CI also builds the image, waits for its healthcheck, and checks a refusal and an approval end to end.
 
 ## What makes this production-aware
 

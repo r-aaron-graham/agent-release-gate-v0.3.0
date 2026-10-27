@@ -10,7 +10,7 @@ os.environ["ADMIN_API_KEY"] = "test-admin-key"
 os.environ["SESSION_SECRET_KEY"] = "test-session-secret"
 os.environ["AUTO_CREATE_SQLITE_SCHEMA"] = "true"
 
-from app.db.session import Base, engine, SessionLocal, create_schema_for_local_dev  # noqa: E402
+from app.db.session import Base, SessionLocal, create_schema_for_local_dev, engine  # noqa: E402
 from app.main import app  # noqa: E402
 
 

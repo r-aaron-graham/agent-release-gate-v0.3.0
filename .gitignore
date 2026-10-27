@@ -6,3 +6,6 @@ __pycache__/
 *.db
 data/
 .env
+.ruff_cache/
+.coverage
+htmlcov/
