@@ -53,11 +53,12 @@ def admin_login_page(request: Request):
 def admin_login_submit(request: Request, api_key: str = Form(...), csrf_token: str = Form(...)):
     validate_csrf(request, csrf_token)
     rate_limiter.enforce(f"admin-login:{client_identifier(request)}", limit=10, window_seconds=60)
-    from app.core.security import _safe_compare  # local import to keep helper private-ish
+    from app.core.security import _safe_compare, admin_session_fingerprint
 
     if not _safe_compare(api_key.strip(), settings.admin_api_key):
         raise HTTPException(status_code=401, detail="Valid admin API key required")
-    request.session["admin_token"] = api_key.strip()
+    request.session.pop("admin_token", None)  # drop sessions created by older versions
+    request.session["admin_session"] = admin_session_fingerprint(api_key.strip())
     request.session["csrf_token"] = ensure_csrf_token(request)
     return RedirectResponse(url="/admin", status_code=303)
 
