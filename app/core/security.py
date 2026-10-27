@@ -1,17 +1,16 @@
 from __future__ import annotations
 
+import hashlib
 import hmac
 from collections import deque
 from datetime import datetime, timedelta, timezone
-from functools import wraps
 from threading import Lock
-from typing import Callable, ParamSpec, TypeVar
+from typing import ParamSpec, TypeVar
 
 from fastapi import Header, HTTPException, Request, status
 
 from app.core.config import settings
 from app.services.utils import new_csrf_token
-
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -47,11 +46,23 @@ def verify_admin_api_key(
     return token or ""
 
 
+def admin_session_fingerprint(api_key: str) -> str:
+    """Value stored in the session cookie instead of the admin key itself.
+
+    Starlette session cookies are signed, not encrypted, so anything put in them
+    is readable by whoever holds the cookie. Storing a keyed hash means a stolen
+    cookie never reveals the API key, and rotating the key logs everyone out.
+    """
+    return hmac.new(
+        settings.session_secret_key.encode("utf-8"), api_key.encode("utf-8"), hashlib.sha256
+    ).hexdigest()
+
+
 def require_admin_session(request: Request) -> str:
-    admin_token = request.session.get("admin_token")
-    if not _safe_compare(admin_token, settings.admin_api_key):
+    fingerprint = request.session.get("admin_session")
+    if not _safe_compare(fingerprint, admin_session_fingerprint(settings.admin_api_key)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin session required")
-    return admin_token or ""
+    return fingerprint or ""
 
 
 def ensure_csrf_token(request: Request) -> str:
@@ -91,6 +102,6 @@ rate_limiter = InMemoryRateLimiter()
 def client_identifier(request: Request) -> str:
     client_ip = request.client.host if request.client else "unknown"
     forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
+    if forwarded and settings.trust_proxy_headers:
         client_ip = forwarded.split(",")[0].strip()
     return client_ip
