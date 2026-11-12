@@ -1,29 +1,19 @@
 # Agent Release Gate
 
-A polished, production-aware release gate for AI systems that need to **refuse**, **fallback**, **ask clarifying questions**, or **route requests to human review** before release.
+A FastAPI and SQLite reference implementation that evaluates a request before
+it reaches an AI agent. Its policy engine can approve, ask for clarification,
+offer a fallback, send a request to human review, or refuse it. Decisions and
+their reasons are available through the browser UI and API.
 
-This repository is the implementation companion to the article idea:
+## Try a decision
 
-> **Why Good AI Systems Refuse: Designing Fallbacks, Escalation Paths, and Human Review Into AI Agents**
+1. Follow the [local quickstart](#option-1-local-python-install).
+2. Open the browser UI at `http://127.0.0.1:8000/`.
+3. Submit the [synthetic destructive request](#test-3-risky-destructive-request)
+   and look for `refused`. Then try the [low-evidence request](#test-5-weak-evidence)
+   and look for `fallback`.
 
-Instead of treating refusal as a failure, this project treats refusal as a **first-class product behavior**.
-
-## Why this revision exists
-
-This rebuilt version addresses the issues called out in prior reviews and reverse engineering:
-
-- removes the admin-key leak from public HTML
-- replaces URL-based admin auth with session-based admin login for the browser UI
-- uses constant-time key comparison for admin auth checks
-- adds a startup schema guard for fresh SQLite installs
-- fixes direct request lookup for the spotlight panel
-- moves prompt preview logic into one shared utility
-- adds a prompt max length to prevent unbounded storage
-- removes build-time seeding from Docker and runs migrations at container startup
-- mounts a persistent SQLite volume in Docker Compose
-- adds HTML validation error handling for browser users
-- makes seed idempotent
-- keeps API admin routes header-protected and UI admin routes session-protected
+[Architecture](#architecture) · [API example](#api-example) · [Tests](#running-tests)
 
 ## What this repository does
 
@@ -296,3 +286,7 @@ It includes:
 
 It is still a starter implementation, not a fully hardened enterprise platform.
 The next steps for a larger deployment would be SSO, PostgreSQL, background jobs, stronger policy semantics, distributed rate limiting, and telemetry export.
+
+## Report a policy example
+
+[Open an issue](https://github.com/r-aaron-graham/agent-release-gate-v0.3.0/issues/new) with a synthetic request, its role, evidence strength, sensitivity, and the expected and observed outcomes. [Follow the author](https://github.com/r-aaron-graham) for related AI engineering projects.
