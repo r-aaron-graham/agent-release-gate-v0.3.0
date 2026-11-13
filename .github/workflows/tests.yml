@@ -29,4 +29,4 @@ jobs:
         run: |
           docker run --detach --name reviewer-smoke --publish 127.0.0.1:8000:8000 reviewer-smoke
           trap 'docker logs reviewer-smoke; docker rm -f reviewer-smoke' EXIT
-          curl --fail --silent --show-error --retry 12 --retry-connrefused --retry-delay 1 http://127.0.0.1:8000/docs > /dev/null
+          curl --fail --silent --show-error --retry 12 --retry-all-errors --max-time 3 --retry-delay 1 http://127.0.0.1:8000/docs > /dev/null
