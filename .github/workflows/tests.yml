@@ -23,3 +23,10 @@ jobs:
           python -m alembic upgrade head
           python -m alembic downgrade base
           python -m alembic upgrade head
+      - name: Build container
+        run: docker build --tag reviewer-smoke .
+      - name: Verify container output
+        run: |
+          docker run --detach --name reviewer-smoke --publish 127.0.0.1:8000:8000 reviewer-smoke
+          trap 'docker logs reviewer-smoke; docker rm -f reviewer-smoke' EXIT
+          curl --fail --silent --show-error --retry 12 --retry-connrefused --retry-delay 1 http://127.0.0.1:8000/docs > /dev/null
