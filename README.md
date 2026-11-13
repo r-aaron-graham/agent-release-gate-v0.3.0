@@ -290,3 +290,14 @@ The next steps for a larger deployment would be SSO, PostgreSQL, background jobs
 ## Report a policy example
 
 [Open an issue](https://github.com/r-aaron-graham/agent-release-gate-v0.3.0/issues/new) with a synthetic request, its role, evidence strength, sensitivity, and the expected and observed outcomes. [Follow the author](https://github.com/r-aaron-graham) for related AI engineering projects.
+
+## Deployment verification
+
+Build the reviewer container from the repository root.
+
+```sh
+docker build -t reviewer-smoke .
+docker run --rm -p 127.0.0.1:8000:8000 reviewer-smoke
+```
+
+From another terminal, run `curl --fail http://127.0.0.1:8000/docs`. Expect HTTP 200. Stop the container with Ctrl+C when finished. Set unique admin and session secrets, restrict network access, and back up the SQLite data before deployment. The bundled Compose credentials are for local evaluation.
