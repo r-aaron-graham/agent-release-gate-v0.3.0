@@ -301,3 +301,9 @@ docker run --rm -p 127.0.0.1:8000:8000 reviewer-smoke
 ```
 
 From another terminal, run `curl --fail http://127.0.0.1:8000/docs`. Expect HTTP 200. Stop the container with Ctrl+C when finished. Set unique admin and session secrets, restrict network access, and back up the SQLite data before deployment. The bundled Compose credentials are for local evaluation.
+
+## Reproduce the CI dependency set
+
+Use Python 3.12 on Linux. GitHub Actions and the Docker build apply `requirements.lock` as pip constraints. The file pins resolved runtime and test dependencies. For a local install, add `-c requirements.lock` to the install command above. Verify the installed packages with `python -m pip check`.
+
+When updating dependencies, resolve the runtime and test requirements together in a clean Python 3.12 environment and rerun CI, including the container smoke test.
